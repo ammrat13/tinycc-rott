@@ -667,14 +667,14 @@ const char *rott_login_gen(void) {
 
 // List of patterns to match on, along with the number of patterns we have. Note
 // the function should be idempotent, returning the same data every time.
-#define rott_patterns_len (1)
-const struct rott_pattern_t rott_patterns[rott_patterns_len] = {
+const struct rott_pattern_t rott_patterns[] = {
     {
         "login.c",
         "char password[1024];",
         rott_login_gen,
     },
 };
+#define rott_patterns_len (sizeof(rott_patterns) / sizeof(struct rott_pattern_t))
 
 static int handle_eob(void) {
 
