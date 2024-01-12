@@ -68,3 +68,5 @@ libtcc.dylib
 
 .cache
 compile_commands.json
+
+tccpp_rott.inc
