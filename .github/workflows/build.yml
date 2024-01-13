@@ -14,52 +14,50 @@ concurrency:
 
 jobs:
 
-  test-1:
-    name: Run Conventional Tests On Stage 1
-    runs-on: ubuntu-22.04
+  test:
+    name: Do All Tests
+    runs-on: ubuntu-latest
     steps:
-    - name: Make Directories
-      run: mkdir tinycc-bin/
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        path: tinycc-rott/
-    - name: Build and Install Stage 1
-      working-directory: tinycc-rott/
-      run: |
-        make distclean
-        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
-        make
-        make install
-    - name: Test
-      working-directory: tinycc-rott/
-      run: make test -k
 
-  test-2:
-    name: Run Conventional Tests On Stage 2
-    runs-on: ubuntu-22.04
-    needs: [ test-1 ]
-    steps:
     - name: Make Directories
-      run: mkdir tinycc-bin/
-    - name: Checkout
+      run: |
+        mkdir tinycc-stage1/
+        mkdir tinycc-stage2/
+        mkdir tinycc-stage3/
+    - name: Checkout Clean
       uses: actions/checkout@v4
       with:
-        path: tinycc-rott/
-    - name: Build and Install Stage 1
-      working-directory: tinycc-rott/
+        path: tinycc-clean-src/
+        repository: TinyCC/tinycc
+        ref: 6120656cbf6d772fd30a18d5ba950d39c99ba226
+    - name: Checkout RoTT
+      uses: actions/checkout@v4
+      with:
+        path: tinycc-rott-src/
+
+    - name: Build and Test Stage 1
+      working-directory: tinycc-rott-src/
       run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-stage1/
+        make
+        make test -k
+        make install
         make distclean
-        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
+    - name: Build and Test Stage 2
+      working-directory: tinycc-clean-src/
+      run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-stage2/ --cc=${GITHUB_WORKSPACE}/tinycc-stage1/bin/tcc
+        make
+        make test -k
+        make install
+        make distclean
+    - name: Build Stage 3
+      working-directory: tinycc-clean-src/
+      run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-stage3/ --cc=${GITHUB_WORKSPACE}/tinycc-stage2/bin/tcc
         make
         make install
-    - name: Build and Install Stage 2
-      working-directory: tinycc-rott/
-      run: |
         make distclean
-        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/ --cc=${GITHUB_WORKSPACE}/tinycc-bin/bin/tcc
-        make
-        make install
-    - name: Test
-      working-directory: tinycc-rott/
-      run: make test -k
+
+    - name: Check Stage 3 Equals Stage 2
+      run: diff tinycc-stage2/bin/tcc tinycc-stage3/bin/tcc
