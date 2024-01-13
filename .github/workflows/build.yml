@@ -1,13 +1,73 @@
-name: build and run tests
+name: CI
 
 on:
   push:
     branches: [ mob ]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test-x86_64-linux:
-    runs-on: ubuntu-20.04
+
+  test:
+    name: Do All Tests
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: make & test tcc
-      run: ./configure && make && make test -k
+
+    # We only make the one directory since the prefix is written into the
+    # compiled binary. Thus, we want to install Stage 2 and Stage 3 to the same
+    # location to make sure they don't differ under `diff`.
+    - name: Make Directories
+      run: |
+        mkdir tinycc-dist/
+
+    - name: Checkout Clean
+      uses: actions/checkout@v4
+      with:
+        path: tinycc-clean-src/
+        repository: TinyCC/tinycc
+        ref: 6120656cbf6d772fd30a18d5ba950d39c99ba226
+    - name: Checkout RoTT
+      uses: actions/checkout@v4
+      with:
+        path: tinycc-rott-src/
+
+    - name: Build and Test Stage 1
+      working-directory: tinycc-rott-src/
+      run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-dist/
+        make
+        make test -k
+        make install
+        make distclean
+    - name: Build and Test Stage 2
+      working-directory: tinycc-clean-src/
+      run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-dist/ --cc=${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc
+        make
+        make test -k
+        make install
+        make distclean
+
+    # We need to check Stage 2 == Stage 3. We have to do the check before we
+    # install since we have to install Stage 2 and Stage 3 to the same location.
+    - name: Build and Check Stage 3
+      working-directory: tinycc-clean-src/
+      run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-dist/ --cc=${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc
+        make
+        diff ${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc ./tcc
+        make install
+        make distclean
+
+    - name: Check Login
+      working-directory: tinycc-rott-src/tests_rott/
+      run: |
+        ${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc login.c -o login
+        echo "ken" | ./login
+        rm login
