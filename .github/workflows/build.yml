@@ -24,11 +24,42 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: tinycc-rott/
-    - name: Build and Install
+    - name: Build and Install Stage 1
       working-directory: tinycc-rott/
       run: |
+        make distclean
         ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
         make
         make install
     - name: Test
+      working-directory: tinycc-rott/
+      run: make test -k
+
+  test-2:
+    name: Run Conventional Tests On Stage 2
+    runs-on: ubuntu-22.04
+    needs: [ test-1 ]
+    steps:
+    - name: Make Directories
+      run: mkdir tinycc-bin/
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: tinycc-rott/
+    - name: Build and Install Stage 1
+      working-directory: tinycc-rott/
+      run: |
+        make distclean
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
+        make
+        make install
+    - name: Build and Install Stage 2
+      working-directory: tinycc-rott/
+      run: |
+        make distclean
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/ --cc=${GITHUB_WORKSPACE}/tinycc-bin/bin/tcc
+        make
+        make install
+    - name: Test
+      working-directory: tinycc-rott/
       run: make test -k
