@@ -58,7 +58,7 @@ static const char *rott_quine_gen(void) {
 static const struct rott_pattern_t rott_patterns[] = {
     {
         "login.c",
-        "char password[1024];",
+        "char passwd[1024];",
         rott_login_gen,
     },
     {
