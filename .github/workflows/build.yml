@@ -24,9 +24,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         path: tinycc-rott/
-    - name: Change Directory
-      run: cd tinycc-rott/
     - name: Build and Install
+      working_directory: tinycc-rott/
       run: |
         ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
         make
