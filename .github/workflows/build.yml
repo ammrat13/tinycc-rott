@@ -51,6 +51,7 @@ jobs:
         ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-dist/ --cc=${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc
         make
         make test -k
+        diff ${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc ./tcc
         make install
         make distclean
 
