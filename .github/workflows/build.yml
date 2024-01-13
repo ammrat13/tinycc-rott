@@ -14,15 +14,22 @@ concurrency:
 
 jobs:
 
-  test:
-    name: Run Conventional Tests
+  test-1:
+    name: Run Conventional Tests On Stage 1
     runs-on: ubuntu-22.04
     steps:
+    - name: Make Directories
+      run: mkdir tinycc-bin/
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Configure
-      run: ./configure
-    - name: Build
-      run: make
+      with:
+        path: tinycc-rott/
+    - name: Change Directory
+      run: cd tinycc-rott/
+    - name: Build and Install
+      run: |
+        ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
+        make
+        make install
     - name: Test
       run: make test -k
