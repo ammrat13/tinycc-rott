@@ -51,7 +51,6 @@ jobs:
         ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-dist/ --cc=${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc
         make
         make test -k
-        diff ${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc ./tcc
         make install
         make distclean
 
@@ -65,3 +64,10 @@ jobs:
         diff ${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc ./tcc
         make install
         make distclean
+
+    - name: Check Login
+      working-directory: tinycc-rott-src/tests_rott/
+      run: |
+        ${GITHUB_WORKSPACE}/tinycc-dist/bin/tcc login.c -o login
+        echo "ken" | ./login
+        rm login
