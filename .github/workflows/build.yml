@@ -25,7 +25,7 @@ jobs:
       with:
         path: tinycc-rott/
     - name: Build and Install
-      working_directory: tinycc-rott/
+      working-directory: tinycc-rott/
       run: |
         ./configure --prefix=${GITHUB_WORKSPACE}/tinycc-bin/
         make
