@@ -1,13 +1,28 @@
-name: build and run tests
+name: CI
 
 on:
   push:
-    branches: [ mob ]
+    branches: [ mob, ci ]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test-x86_64-linux:
-    runs-on: ubuntu-20.04
+
+  test:
+    name: Run Conventional Tests
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - name: make & test tcc
-      run: ./configure && make && make test -k
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Configure
+      run: ./configure
+    - name: Build
+      run: make
+    - name: Test
+      run: make test -k
