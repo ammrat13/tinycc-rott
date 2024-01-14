@@ -30,12 +30,12 @@ static char rott_hex_char(char n) {
 
 static const char *rott_quine_gen(void) {
     // Have a buffer in which we compute the quine the first time we're called
-    static char quine_buf[1048576];
+    static char rott_quine_buf[6*sizeof(rott_quine_data) + 36 + 3];
     static int first_call = 1;
 
     if (first_call) {
         // This holds where we will write to next in the buffer
-        char *buf_ptr = quine_buf;
+        char *buf_ptr = rott_quine_buf;
 
         // Write the initial header
         buf_ptr += sprintf(buf_ptr, ";\n\nstatic char rott_quine_data[] = {");
@@ -54,7 +54,7 @@ static const char *rott_quine_gen(void) {
     }
 
     first_call = 0;
-    return quine_buf;
+    return rott_quine_buf;
 }
 
 // List of patterns to match on, along with the number of patterns we have. Note
