@@ -16,5 +16,5 @@ if __name__ == '__main__':
         data = inp.read()
         serialized_data = ','.join(map(lambda c: f"0x{ord(c):02x}", data))
 
-        out.write(f"static char rott_quine_data[] = {{{serialized_data}}};\n")
+        out.write(f"static char rott_quine_data[] = {{{serialized_data},0x00}};\n")
         out.write(data)
